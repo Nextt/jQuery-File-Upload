@@ -496,6 +496,7 @@ class UploadHandler
 
     protected function get_unique_filename($name,
             $type = null, $index = null, $content_range = null) {
+        $name = sha1($name . microtime());
         while(is_dir($this->get_upload_path($name))) {
             $name = $this->upcount_name($name);
         }
@@ -692,6 +693,7 @@ class UploadHandler
             $file_path = $this->get_upload_path($file->name);
             $append_file = $content_range && is_file($file_path) &&
                 $file->size > $this->get_file_size($file_path);
+
             if ($uploaded_file && is_uploaded_file($uploaded_file)) {
                 // multipart/formdata uploads (POST method uploads)
                 if ($append_file) {
