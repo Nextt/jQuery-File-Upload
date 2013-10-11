@@ -9,21 +9,21 @@
 
 <div class="container">
 
-    <span class="btn btn-success fileinput-button">
-        <!-- The file input field used as target for the file upload widget -->
-        <form>
-           <input id="fileupload" type="file" name="files" >
-        </form>
-    </span>
-    <br>
-    <br>
-    <!-- The global progress bar -->
-    <div id="progress" class="progress">
-        <div class="progress-bar progress-bar-success"></div>
-    </div>
-    <!-- The container for the uploaded files -->
-    <div id="files" class="files"></div>
-    <br>
+	<span class="btn btn-success fileinput-button">
+		<!-- The file input field used as target for the file upload widget -->
+		<form>
+		   <input id="fileupload" type="file" name="files" >
+		</form>
+	</span>
+	<br>
+	<br>
+	<!-- The global progress bar -->
+	<div id="progress" class="progress">
+		<div class="progress-bar progress-bar-success"></div>
+	</div>
+	<!-- The container for the uploaded files -->
+	<div id="files" class="files"></div>
+	<br>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
@@ -39,45 +39,62 @@
 /*jslint unparam: true */
 /*global window, $ */
 $(function () {
-    'use strict';
-    // Change this to the location of your server-side upload handler:
-    $('#fileupload').fileupload({
-        url: 'server/php/',
-        autoUpload: true,
-        forceIframeTransport: true,
-        dataType: 'json',
-        change: function(index, file) { console.log(index); console.log(file); },
-        done: function (e, data) {
-            $.each(data.result.files, function (index, file) {
-                $('#files').html('');
-                $('#files').append('<img style="width: 400px;" src="'+file.url+'" id="jcrop_target" /><br /><br />');
-                $('#files').append('<img style="display: none" src="'+file.url+'" id="jcrop_original" />');
-                $('#files').append('<div id="preview_frame" style="height: 250px; width: 250px; overflow: hidden;"><img src="'+file.url+'" id="preview" /></div>');
-                $('#jcrop_target').Jcrop({ onChange: showPreview, onSelect: showPreview, aspectRatio: 1, maxSize: [250,250], allowMove: true });
-            });
-        },
-        progressall: function (e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css(
-                'width',
-                progress + '%'
-            );
-        }
-    }).prop('disabled', !$.support.fileInput)
-        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+	'use strict';
+	// Change this to the location of your server-side upload handler:
+	$('#fileupload').fileupload({
+		url: 'server/php/',
+		autoUpload: true,
+		forceIframeTransport: true,
+		dataType: 'json',
+		done: function (e, data) {
+			$.each(data.result.files, function (index, file) {
+				$('#files').html('');
+				$('#files').append('<img style="width: 400px;" src="'+file.url+'" id="jcrop_target" /><br /><br />');
+				$('#files').append('<img style="display: none" src="'+file.url+'" id="jcrop_original" />');
+				$('#files').append('<div id="preview_frame" style="height: 250px; width: 250px; overflow: hidden;"><img src="'+file.url+'" id="preview" /></div>');
+				$('#files').append('<input type="submit" id="generate_thumb" />');
+				$('#generate_thumb').click(function() { buildThumb(file.url); });
+				$('#jcrop_target').Jcrop({ onChange: showPreview, onSelect: showPreview, aspectRatio: 1, maxSize: [250,250], allowMove: true });
+			});
+		},
+		progressall: function (e, data) {
+			var progress = parseInt(data.loaded / data.total * 100, 10);
+			$('#progress .progress-bar').css(
+				'width',
+				progress + '%'
+			);
+		}
+	}).prop('disabled', !$.support.fileInput)
+		.parent().addClass($.support.fileInput ? undefined : 'disabled');
 
 });
+var thumbnail_coords;
+function buildThumb(image_url) {
+	if(thumbnail_coords) {
+		thumbnail_coords.url = image_url;
+		console.log(thumbnail_coords);
+		$.ajax({
+			url: 'server/php/?resize=true',
+			data: thumbnail_coords,
+			success: function(data) {
+				console.log(data);
+			},
+			dataType: json
+		});
+	}
+}
 function showPreview(coords)
 {
-    var rx = $('#preview_frame').width() / coords.w;
-    var ry = $('#preview_frame').height() / coords.h;
+	thumbnail_coords = coords;
+	var rx = $('#preview_frame').width() / coords.w;
+	var ry = $('#preview_frame').height() / coords.h;
 
-    $('#preview').css({
-        width: Math.round(rx * $('#jcrop_target').width()) + 'px',
-        height: Math.round(ry * $('#jcrop_target').height()) + 'px',
-        marginLeft: '-' + Math.round(rx * coords.x) + 'px',
-        marginTop: '-' + Math.round(ry * coords.y) + 'px'
-    }).show();
+	$('#preview').css({
+		width: Math.round(rx * $('#jcrop_target').width()) + 'px',
+		height: Math.round(ry * $('#jcrop_target').height()) + 'px',
+		marginLeft: '-' + Math.round(rx * coords.x) + 'px',
+		marginTop: '-' + Math.round(ry * coords.y) + 'px'
+	}).show();
 }
 </script>
 </body> 
