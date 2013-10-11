@@ -53,6 +53,7 @@ $(function () {
 				$('#files').append('<img style="display: none" src="'+file.url+'" id="jcrop_original" />');
 				$('#files').append('<div id="preview_frame" style="height: 250px; width: 250px; overflow: hidden;"><img src="'+file.url+'" id="preview" /></div>');
 				$('#files').append('<input type="submit" id="generate_thumb" />');
+				$('#files').append('<div id="thumb"></div>');
 				$('#generate_thumb').click(function() { buildThumb(file.url); });
 				$('#jcrop_target').Jcrop({ onChange: showPreview, onSelect: showPreview, aspectRatio: 1, maxSize: [250,250], allowMove: true });
 			});
@@ -77,9 +78,8 @@ function buildThumb(image_url) {
 			url: 'server/php/?resize=true',
 			data: thumbnail_coords,
 			success: function(data) {
-				console.log(data);
-			},
-			dataType: json
+				$('#thumb').html(data);
+			}
 		});
 	}
 }
