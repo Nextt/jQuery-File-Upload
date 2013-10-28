@@ -28,7 +28,7 @@ if(isset($_GET['resize'])) {
 		imagecopyresampled ($dst_image, $src_image , 0, 0, $src_x, $src_y, 250, 250, $src_w, $src_h);
 		imagepng ($dst_image, 'files/thumb_'.$filename.'.png');
 
-		echo '<img src="'.str_replace($filename, 'thumb_'.$filename.'.png', $_REQUEST['url']).'" />';
+		echo str_replace($filename, 'thumb_'.$filename.'.png', $_REQUEST['url']);
 	}
 } else {
 	error_reporting(E_ALL | E_STRICT);
